@@ -1,0 +1,98 @@
+:root {
+  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+  color: #E1DFDB;
+
+  /* color-scheme: light dark; */
+  /* color: rgba(255, 255, 255, 0.87); */
+  /* background-color: #242424; */
+  background-color: #17191B;
+  /* background-color: #0D0F11; */
+
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+
+* {
+  box-sizing: border-box;
+}
+
+html, body, #root {
+  font-family: "Poppins-Regular", sans-serif !important;
+  width: 525px;
+  max-width: 525px;
+  height: 800px;
+  margin: 0;
+  padding: 0;
+}
+
+h1 {
+font-family: 'Poppins-Black', sans-serif !important;
+}
+
+.btn {
+font-family: "Poppins-Regular", sans-serif !important;
+}
+
+.bg-custom-blue {
+background-color: rgb(34, 105, 181) !important;
+}
+
+.bg-custom-button-color {
+background-color: #009dff !important;
+color: #000000;
+}
+
+.trackDisplay, .carrierDisplay, .etaDisplay, .statusDisplay {
+font-family: 'Poppins-SemiBold', sans-serif !important;
+}
+
+.message-success {
+color: rgb(65, 255, 65);
+}
+.message-error {
+color: rgb(246, 33, 33);
+}
+.message-warning {
+color: rgb(255, 220, 92);
+}
+.message-normal {
+color: rgb(255, 255, 255);
+}
+
+
+/* .custom-margin-right {
+margin-right: 10px !important; 
+} */
+
+
+/* total width */
+body::-webkit-scrollbar {
+background-color: #fff;
+width: 10px;
+}
+
+/* background of the scrollbar except button or resizer */
+body::-webkit-scrollbar-track {
+background-color: #fff;
+}
+
+/* scrollbar itself */
+body::-webkit-scrollbar-thumb {
+background-color:  rgb(34, 105, 181);
+border-radius: 12px;
+border: 2px solid #fff;
+}
+
+/* set button(top and bottom of the scrollbar) */
+body::-webkit-scrollbar-button {
+display:none;
+}
+
+
+/* #2176FF */
+
