@@ -18,7 +18,7 @@ function App() {
         <TopBar />
 
         <div style={{
-          marginTop: '150px', 
+          marginTop: '135px', 
           overflowY: 'auto',
           flex: 1
         }}>

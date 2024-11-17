@@ -38,14 +38,6 @@ font-family: 'Poppins-Black', sans-serif !important;
 font-family: "Poppins-Regular", sans-serif !important;
 }
 
-.bg-custom-blue {
-background-color: rgb(34, 105, 181) !important;
-}
-
-.bg-custom-button-color {
-background-color: #009dff !important;
-color: #000000;
-}
 
 .trackDisplay, .carrierDisplay, .etaDisplay, .statusDisplay {
 font-family: 'Poppins-SemiBold', sans-serif !important;
@@ -65,11 +57,6 @@ color: rgb(255, 255, 255);
 }
 
 
-/* .custom-margin-right {
-margin-right: 10px !important; 
-} */
-
-
 /* total width */
 body::-webkit-scrollbar {
 background-color: #fff;
@@ -83,7 +70,7 @@ background-color: #fff;
 
 /* scrollbar itself */
 body::-webkit-scrollbar-thumb {
-background-color:  rgb(34, 105, 181);
+background-color:  #242424;
 border-radius: 12px;
 border: 2px solid #fff;
 }

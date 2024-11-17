@@ -1,6 +1,7 @@
 import TextField from '@mui/material/TextField';
 import Box from '@mui/material/Box';
 
+
 export default function TrackingEntry() {
     return (
         // <Box
@@ -10,7 +11,22 @@ export default function TrackingEntry() {
         // autoComplete="on"
         // >
             // </Box>
-                <TextField placeholder="Enter Tracking Number" color="#E1DFDB" variant="outlined" size="small" autoComplete="off"/>
+            <>
+
+                        
+                <TextField 
+                    placeholder="Enter Tracking Number" 
+                    color="#E1DFDB" 
+                    variant="outlined" 
+                    size="small" 
+                    autoComplete="off"
+                    fullWidth
+                    sx={{
+                        width: '400px'
+                    }}
+                />
+                
+            </>
 
     );
 }

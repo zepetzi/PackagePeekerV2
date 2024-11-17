@@ -7,7 +7,9 @@ import TitleIcon from './TitleIcon';
 // import TitleSection from './TitleSection';
 import { Typography } from '@mui/material';
 import { Grid2 } from '@mui/material';
-
+import LoadingButton from '@mui/lab/LoadingButton';
+import PlusIcon from '@mui/icons-material/Add';
+import RefreshIcon from '@mui/icons-material/Refresh';
 
 
 
@@ -30,7 +32,9 @@ function TopBar({ onRefresh }) {
             // bgcolor: '#667085'
             // bgcolor: '#4E576A',
             // bgcolor: '#17191B',
-            backgroundColor: '#242424'
+            backgroundColor: '#242424',
+            zIndex: 9999,
+            isolation: 'isolate'
           }} 
           elevation={3}
       >
@@ -41,17 +45,65 @@ function TopBar({ onRefresh }) {
             justifyContent: 'left', 
             alignItems: 'center',
             height: '100%',
-            width: '100%'
+            width: '100%',
+            id: 'BOXXXX',
           }}
-          
           >
 
-        <Grid2 container spacing={2}>   
+        <Grid2 container spacing={1} sx={{display: 'flex', width: '100%', alignItems: 'center', justifyContent: 'center'}} >   
           <Grid2 size={12}>
             <TitleIcon />
           </Grid2>
           <Grid2 size={12}>
+          <Box
+          padding={0}
+          margin={0}
+          sx={{ 
+            display: 'flex', 
+            justifyContent: 'space-between', 
+            alignItems: 'center',
+            height: '100%',
+            width: '100%',
+            id: 'BOXXXX2',
+            // gap: 0
+          }}
+          >
             <TrackingEntry />
+            <LoadingButton
+                variant="contained"
+                color="primary"
+                startIcon={<PlusIcon />}
+                sx={{
+                  minWidth: '50px',
+                  width: '50',
+                  height: '34px',
+                  padding: '0',
+                  color: '#E1DFDB',
+                  backgroundColor: '#606060',
+                  '& .MuiButton-startIcon': {
+                    margin: 0
+                  }
+                }}
+            >
+            </LoadingButton>
+            <LoadingButton
+                variant="contained"
+                color="primary"
+                startIcon={<RefreshIcon />}
+                sx={{
+                  minWidth: '50px',
+                  width: '50px',
+                  height: '34px',
+                  padding: '0',
+                  color: '#E1DFDB',
+                  backgroundColor: '#606060', 
+                  '& .MuiButton-startIcon': {
+                    margin: 0
+                  }
+                }}
+            >
+            </LoadingButton>
+          </Box>
           </Grid2>
         </Grid2>
         </Box>
