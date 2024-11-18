@@ -84,11 +84,14 @@ function TopBar({ onRefresh }) {
                     margin: 0
                   }
                 }}
-            >
+            > 
             </LoadingButton>
+            
             <LoadingButton
+                
                 variant="contained"
                 color="primary"
+                // startIcon={!loading ? <RefreshIcon /> : null}
                 startIcon={<RefreshIcon />}
                 sx={{
                   minWidth: '50px',
@@ -96,9 +99,23 @@ function TopBar({ onRefresh }) {
                   height: '34px',
                   padding: '0',
                   color: '#E1DFDB',
-                  backgroundColor: '#606060', 
+                  backgroundColor: '#606060',
                   '& .MuiButton-startIcon': {
                     margin: 0
+                  },
+                  '&:hover': {
+                    backgroundColor: '#505050',
+                  },
+                  '&.MuiLoadingButton-loading': {
+                    color: '#E1DFDB',
+                    backgroundColor: '#606060',
+                  },
+                  '&.MuiLoadingButton-loading:hover': {
+                    backgroundColor: '#606060',
+                  },
+                  '& .MuiLoadingButton-loading': {
+                    color: '#E1DFDB',
+                    backgroundColor: '#606060',
                   }
                 }}
             >
