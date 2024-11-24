@@ -55,71 +55,73 @@ function TopBar({ onRefresh }) {
             <TitleIcon />
           </Grid2>
           <Grid2 size={12}>
-          <Box
-          padding={0}
-          margin={0}
-          sx={{ 
-            display: 'flex', 
-            justifyContent: 'space-between', 
-            alignItems: 'center',
-            height: '100%',
-            width: '100%',
-            id: 'BOXXXX2',
-            // gap: 0
-          }}
-          >
-            <TrackingEntry />
-            <LoadingButton
-                variant="contained"
-                color="primary"
-                startIcon={<PlusIcon />}
-                sx={{
-                  minWidth: '50px',
-                  width: '50',
-                  height: '34px',
-                  padding: '0',
-                  color: '#E1DFDB',
-                  backgroundColor: '#606060',
-                  '& .MuiButton-startIcon': {
-                    margin: 0
-                  }
-                }}
-            > 
-            </LoadingButton>
-            
-            <LoadingButton
-                
-                variant="contained"
-                color="primary"
-                // startIcon={!loading ? <RefreshIcon /> : null}
-                startIcon={<RefreshIcon />}
-                sx={{
-                  minWidth: '50px',
-                  width: '50px',
-                  height: '34px',
-                  padding: '0',
-                  color: '#E1DFDB',
-                  backgroundColor: '#606060',
-                  '& .MuiButton-startIcon': {
-                    margin: 0
-                  },
-                  '&:hover': {
-                    backgroundColor: '#505050',
-                  },
-                  '&.MuiLoadingButton-loading': {
+            <Box
+            id="Boxy Box"
+            padding={0}
+            margin={0}
+            sx={{ 
+              display: 'flex', 
+              justifyContent: 'space-between', 
+              alignItems: 'center',
+              height: '100%',
+              width: '100%',
+              id: 'BOXXXX2',
+              // gap: 0
+            }}
+              >
+              <TrackingEntry />
+              
+              <LoadingButton
+                  variant="contained"
+                  color="primary"
+                  startIcon={<PlusIcon />}
+                  sx={{
+                    minWidth: '50px',
+                    width: '50',
+                    height: '34px',
+                    padding: '0',
                     color: '#E1DFDB',
                     backgroundColor: '#606060',
-                  },
-                  '&.MuiLoadingButton-loading:hover': {
-                    backgroundColor: '#606060',
-                  },
-                  '& .MuiLoadingButton-loading': {
+                    '& .MuiButton-startIcon': {
+                      margin: 0
+                    }
+                  }}
+              > 
+              </LoadingButton>
+              
+              <LoadingButton
+                  
+                  variant="contained"
+                  color="primary"
+                  // startIcon={!loading ? <RefreshIcon /> : null}
+                  startIcon={<RefreshIcon />}
+                  sx={{
+                    minWidth: '50px',
+                    width: '50px',
+                    height: '34px',
+                    padding: '0',
                     color: '#E1DFDB',
                     backgroundColor: '#606060',
-                  }
-                }}
-            >
-            </LoadingButton>
+                    '& .MuiButton-startIcon': {
+                      margin: 0
+                    },
+                    '&:hover': {
+                      backgroundColor: '#505050',
+                    },
+                    '&.MuiLoadingButton-loading': {
+                      color: '#E1DFDB',
+                      backgroundColor: '#606060',
+                    },
+                    '&.MuiLoadingButton-loading:hover': {
+                      backgroundColor: '#606060',
+                    },
+                    '& .MuiLoadingButton-loading': {
+                      color: '#E1DFDB',
+                      backgroundColor: '#606060',
+                    }
+                  }}
+              >
+              </LoadingButton>
           </Box>
           </Grid2>
         </Grid2>
