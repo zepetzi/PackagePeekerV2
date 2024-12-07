@@ -84,24 +84,40 @@ export const getTrackingData = async (carrier) => {
           //otherwise get pre ship information 
           } else {
             const status = await page.locator('.red-banner .banner-header').textContent()
-            .then(text => text.trim().replace(/\s+/g, ' '));            
+            .then(text => text.trim().replace(/\s+/g, ' '));
+
           }
+          const ETAdate = 'N/A'; 
           const progressVal = 0;
-
-        // if package is in progress  
-        } else if (await page.locator('.eta_wrap').count() > 0) {
-            const date = await page.locator('.eta_snip .date').textContent();
-            const month = await page.locator('.month_year span').first().textContent();
-            const fullText = await page.locator('.month_year').textContent();
-            const year = fullText.split(' ')[1];
-            const status = await page.locator('.tb-step.current-step .tb-status-detail').textContent();
-
-          //if package has been delivered
+        
+        //if package has been delivered  
         } else if (await page.locator('.tracking-progress-bar-status-container.delivered-status').count() > 0) {
             const date = await page.locator('.eta_snip .date').textContent();  
             const status = await page.locator('.tb-step.current-step .tb-status').textContent();
             const progressVal = 100;
-        }
+        
+        // if package is in progress  
+        } else if (await page.locator('.eta_wrap').count() > 0) {
+          
+          // check if there's a date
+          if (await page.locator('.eta_snip .date').count() > 0) {
+            const day = await page.locator('.eta_snip .date').textContent();
+            const month = await page.locator('.month_year span').first().textContent();
+            const fullText = await page.locator('.month_year').textContent();
+            const year = fullText.split(' ')[1];
+            const progressVal = Math.floor((await page.locator('.tracking-progress-bar-status-container.in-transit-status div').count()/20)*100);  
+
+          // otherwise set date, month, year to N/A
+          } else {
+            const day = 'N/A';
+            const month = 'N/A';
+            const year = 'N/A';
+            const progressVal = 0;
+          } 
+          // status should still exist
+          const status = await page.locator('.tb-step.current-step .tb-status-detail').textContent();
+        }     
+    }
 
     // mapping for carriers to their respective functions
     const carrierActions = {
@@ -118,7 +134,7 @@ export const getTrackingData = async (carrier) => {
         throw new Error("Unsupported carrier");
     }
 
-    }
+    
 };
 
 
