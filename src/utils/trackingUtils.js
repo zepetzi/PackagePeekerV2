@@ -1,50 +1,127 @@
 import { saveTrackingData, getTrackingData } from './storageUtils';
+const { chromium } = require('playwright');
+
 
 export async function determineCarrier(trackingInput) {
-        //regex for testing the trackingNumber argument
-        var ups = /^1Z[0-9A-Z]{16}$/;
-        var fedex1 = /^\d{12}$/;
-        var fedex2 = /^\d{15}$/;
-        var usps1 = /^94\d{20}$/;
-        var usps2 = /^92\d{20}$/;
-        var usps3 = /^\d{30}$/;
-        var usps4 = /^\d{26}$/;
-        var usps5 = /^420\d{31}$/;
-    
-        // conditional logic using the test() method
-        if (ups.test(trackingInput)) {
-            return 'UPS';
-        } else if (fedex1.test(trackingInput) || fedex2.test(trackingInput)) {
-            return 'FedEx';
-        } else if (usps1.test(trackingInput) || usps2.test(trackingInput) || usps3.test(trackingInput) || usps4.test(trackingInput) || usps5.test(trackingInput)) {
-            return 'USPS';
 
-        } else if (trackingInput === '') {
+    const regexPatterns = {
 
-            console.error("No tracking number entered!");
-            // statusMessage = "Unrecognized Carrier Format";
-            // updateMessage(statusMessage);
-            throw new Error("No tracking number entered!");
+      //regex to determine carrier
+        UPS: /^1Z[0-9A-Z]{16}$/,
+        FedEx: [/^\d{12}$/, /^\d{15}$/],
+        USPS: [/^94\d{20}$/, /^92\d{20}$/, /^\d{30}$/, /^\d{26}$/, /^420\d{31}$/]
+    };
 
-        } else {
+    //if no tracking number entered, return/throw error
+    if (trackingInput === '') {
+        console.error("No tracking number entered!");
+        throw new Error("No tracking number entered!");
+    }
 
-            console.error("Unrecognized Carrier Format");
-            // statusMessage = "Unrecognized Carrier Format";
-            // updateMessage(statusMessage);
-            throw new Error("Unrecognized Carrier Format");
-        }
-
-};
+    //test patterns to determine carrier
+    if (regexPatterns.UPS.test(trackingInput)) {
+        return 'UPS';
+      //syntax reminder: test regexPatterns, for the Fedex key's values, and see if at 
+      //least 'some' of the things in the Fedex array passes the test in the some method
+    } else if (regexPatterns.FedEx.some(pattern => pattern.test(trackingInput))) {
+        return 'FedEx';
+    } else if (regexPatterns.USPS.some(pattern => pattern.test(trackingInput))) {
+        return 'USPS';
+    } else {
+        console.error("Unrecognized Carrier Format");
+        throw new Error("Unrecognized Carrier Format");
+    }
+}
 
 export async function checkDupe(trackingInput) {
-  // Implementation from checkDupe function
-  // ...
-}
+    //check if duplicate exists aka tracking number is already being tracked
+    let dupeData = await chrome.storage.local.get(trackingInput);
+    if (dupeData.hasOwnProperty(trackingInput)) {
+        statusMessage = "Tracking number already exists!";
+        console.log("Tracking number already exists!");
+        updateMessage(statusMessage, "warning");
+        throw new Error("Tracking number already exists!");
+    }
+};
 
-export async function checkInfoFound(responseBody) {
-  // Implementation from checkInfoFound function
-  // ...
-}
+export const getTrackingData = async (carrier) => {
+    const browser = await chromium.launch({ 
+        headless: false,
+        slowMo: 500
+    });
+    const context = await browser.newContext();
+    const page = await context.newPage();
+
+    // Define carrier-specific functions
+    const trackUPS = async () => {
+        await page.goto(`https://www.ups.com/track?loc=en_US&tracknum=${trackingNumber}`);
+        // Add any UPS-specific actions here
+    };
+
+    const trackFedEx = async () => {
+        await page.goto(`https://www.fedex.com/apps/fedextrack/?tracknumbers=${trackingNumber}`);
+        const status = await page.locator('trk-shared-shipment-delivery-status .fdx-c-heading--h5').textContent();
+        const progressVal = await page.locator('.shipment-status-progress-bar-track-overlay').evaluate((el) => {
+          const heightStyle = window.getComputedStyle(el).height;
+          if (heightStyle.includes('%')) {
+              return '100'; 
+          } else {
+              return Math.floor((parseFloat(heightStyle)/335)*100);
+          }
+        // const packageETA = await page.locator()
+      });
+    };
+
+    const trackUSPS = async () => {
+        await page.goto(`https://tools.usps.com/go/TrackConfirmAction?tLabels=${trackingNumber}`);
+
+        //if shipping status is not available
+        if (await page.locator('latest-update-banner-wrapper red-banner').count() > 0) {
+          
+          //if information/package not found
+          if (await page.locator('.red-banner .banner-header').textContent() === 'Status Not Available') {
+            const status = 'Status Not Available';
+          //otherwise get pre ship information 
+          } else {
+            const status = await page.locator('.red-banner .banner-header').textContent()
+            .then(text => text.trim().replace(/\s+/g, ' '));            
+          }
+          const progressVal = 0;
+
+        // if package is in progress  
+        } else if (await page.locator('.eta_wrap').count() > 0) {
+            const date = await page.locator('.eta_snip .date').textContent();
+            const month = await page.locator('.month_year span').first().textContent();
+            const fullText = await page.locator('.month_year').textContent();
+            const year = fullText.split(' ')[1];
+            const status = await page.locator('.tb-step.current-step .tb-status-detail').textContent();
+
+          //if package has been delivered
+        } else if (await page.locator('.tracking-progress-bar-status-container.delivered-status').count() > 0) {
+            const date = await page.locator('.eta_snip .date').textContent();  
+            const status = await page.locator('.tb-step.current-step .tb-status').textContent();
+            const progressVal = 100;
+        }
+
+    // mapping for carriers to their respective functions
+    const carrierActions = {
+        UPS: trackUPS,
+        FedEx: trackFedEx,
+        USPS: trackUSPS
+    };
+
+    // execute the action based on the carrier
+    if (carrierActions[carrier]) {
+        await carrierActions[carrier]();
+    } else {
+        console.error("Unsupported carrier");
+        throw new Error("Unsupported carrier");
+    }
+
+    }
+};
+
+
 
 export async function saveToChromeStorage(responseBody) {
   // Implementation from saveToChromeStorage function
