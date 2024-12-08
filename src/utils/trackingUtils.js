@@ -52,14 +52,17 @@ export const getTrackingData = async (carrier) => {
     const context = await browser.newContext();
     const page = await context.newPage();
 
-    // Define carrier-specific functions
+  
     const trackUPS = async () => {
-        await page.goto(`https://www.ups.com/track?loc=en_US&tracknum=${trackingNumber}`);
+        await page.goto(`https://www.ups.com/track?loc=en_US&tracknum=${trackingInput}`);
         // Add any UPS-specific actions here
     };
 
     const trackFedEx = async () => {
+
         await page.goto(`https://www.fedex.com/apps/fedextrack/?tracknumbers=${trackingNumber}`);
+
+
         const status = await page.locator('trk-shared-shipment-delivery-status .fdx-c-heading--h5').textContent();
         const progressVal = await page.locator('.shipment-status-progress-bar-track-overlay').evaluate((el) => {
           const heightStyle = window.getComputedStyle(el).height;
@@ -73,50 +76,55 @@ export const getTrackingData = async (carrier) => {
     };
 
     const trackUSPS = async () => {
-        await page.goto(`https://tools.usps.com/go/TrackConfirmAction?tLabels=${trackingNumber}`);
+        await page.goto(`https://tools.usps.com/go/TrackConfirmAction?tLabels=${trackingInput}`);
+        let status, ETAdate, progressVal;  
 
         //if shipping status is not available
         if (await page.locator('latest-update-banner-wrapper red-banner').count() > 0) {
           
           //if information/package not found
           if (await page.locator('.red-banner .banner-header').textContent() === 'Status Not Available') {
-            const status = 'Status Not Available';
+            status = 'Status Not Available';
+
           //otherwise get pre ship information 
           } else {
-            const status = await page.locator('.red-banner .banner-header').textContent()
-            .then(text => text.trim().replace(/\s+/g, ' '));
-
+            status = await page.locator('.red-banner .banner-header').textContent()
+              .then(text => text.trim().replace(/\s+/g, ' '));
           }
-          const ETAdate = 'N/A'; 
-          const progressVal = 0;
+          ETAdate = 'N/A'; 
+          progressVal = 0;
         
         //if package has been delivered  
         } else if (await page.locator('.tracking-progress-bar-status-container.delivered-status').count() > 0) {
-            const date = await page.locator('.eta_snip .date').textContent();  
-            const status = await page.locator('.tb-step.current-step .tb-status').textContent();
-            const progressVal = 100;
+            // date format for this status is 'November 5, 2024, 6:10 am' in one string
+            const dateWithTime = await page.locator('.eta_snip .date').textContent().trim().split(',')
+            ETAdate = dateWithTime[0]+', '+dateWithTime[1];
+            status = await page.locator('.tb-step.current-step .tb-status').textContent();
+            progressVal = 100;
         
         // if package is in progress  
         } else if (await page.locator('.eta_wrap').count() > 0) {
           
           // check if there's a date
           if (await page.locator('.eta_snip .date').count() > 0) {
-            const day = await page.locator('.eta_snip .date').textContent();
-            const month = await page.locator('.month_year span').first().textContent();
-            const fullText = await page.locator('.month_year').textContent();
-            const year = fullText.split(' ')[1];
-            const progressVal = Math.floor((await page.locator('.tracking-progress-bar-status-container.in-transit-status div').count()/20)*100);  
+            // date format for this status is across different spans, ('day', 'month', 'year') 
+              const day = await page.locator('.eta_snip .date').textContent();
+              const month = await page.locator('.month_year span').first().textContent();
+              const fullText = await page.locator('.month_year').textContent();
+              const year = fullText.split(' ')[1];
+              ETAdate = month+', '+day+' '+year;
+              progressVal = Math.floor((await page.locator('.tracking-progress-bar-status-container.in-transit-status div').count()/20)*100);  
 
           // otherwise set date, month, year to N/A
           } else {
-            const day = 'N/A';
-            const month = 'N/A';
-            const year = 'N/A';
-            const progressVal = 0;
+            ETAdate = 'N/A';
+            progressVal = 0;
           } 
           // status should still exist
-          const status = await page.locator('.tb-step.current-step .tb-status-detail').textContent();
+          status = await page.locator('.tb-step.current-step .tb-status-detail').textContent();
         }     
+
+        return createTrackingData(carrier, trackingInput, status, progressVal, ETAdate);
     }
 
     // mapping for carriers to their respective functions
@@ -135,9 +143,21 @@ export const getTrackingData = async (carrier) => {
     }
 
     
+
+
+
 };
 
 
+const createTrackingData = (carrier, trackingInput, status, progressVal, ETAdate) => {
+  return {
+      carrier: carrier,
+      trackingNumber: trackingInput,
+      status: status,
+      progress: progressVal,
+      ETA: ETAdate
+  };
+};
 
 export async function saveToChromeStorage(responseBody) {
   // Implementation from saveToChromeStorage function
