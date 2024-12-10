@@ -51,33 +51,44 @@ export const getTrackingData = async (carrier) => {
     });
     const context = await browser.newContext();
     const page = await context.newPage();
-
+    let status, etaDate, progressVal;
   
     const trackUPS = async () => {
         await page.goto(`https://www.ups.com/track?loc=en_US&tracknum=${trackingInput}`);
+        
         // Add any UPS-specific actions here
     };
 
     const trackFedEx = async () => {
 
         await page.goto(`https://www.fedex.com/apps/fedextrack/?tracknumbers=${trackingNumber}`);
+        
 
-
-        const status = await page.locator('trk-shared-shipment-delivery-status .fdx-c-heading--h5').textContent();
-        const progressVal = await page.locator('.shipment-status-progress-bar-track-overlay').evaluate((el) => {
+        // if tracking number is not found or there is some error
+        if (await page.locator('.systemErrorTop').count() > 0) {
+          status = 'Status Not Available';
+          etaDate = 'N/A';
+          progressVal = 0;
+          
+        } else {
+          
+          status = await page.locator('trk-shared-shipment-delivery-status .fdx-c-heading.fdx-c-heading--h5').textContent().trim();
+          progressVal = await page.locator('.shipment-status-progress-bar-track-overlay').evaluate((el) => {
           const heightStyle = window.getComputedStyle(el).height;
           if (heightStyle.includes('%')) {
               return '100'; 
           } else {
               return Math.floor((parseFloat(heightStyle)/335)*100);
           }
-        // const packageETA = await page.locator()
-      });
-    };
+          });
+        
+          etaDate = await page.locator('.deliveryDateTextBetween').textContent().split(' at ')[0];
+        };
 
+    }
     const trackUSPS = async () => {
         await page.goto(`https://tools.usps.com/go/TrackConfirmAction?tLabels=${trackingInput}`);
-        let status, ETAdate, progressVal;  
+          
 
         //if shipping status is not available
         if (await page.locator('latest-update-banner-wrapper red-banner').count() > 0) {
@@ -91,14 +102,14 @@ export const getTrackingData = async (carrier) => {
             status = await page.locator('.red-banner .banner-header').textContent()
               .then(text => text.trim().replace(/\s+/g, ' '));
           }
-          ETAdate = 'N/A'; 
+          etaDate = 'N/A'; 
           progressVal = 0;
         
         //if package has been delivered  
         } else if (await page.locator('.tracking-progress-bar-status-container.delivered-status').count() > 0) {
             // date format for this status is 'November 5, 2024, 6:10 am' in one string
             const dateWithTime = await page.locator('.eta_snip .date').textContent().trim().split(',')
-            ETAdate = dateWithTime[0]+', '+dateWithTime[1];
+            etaDate = dateWithTime[0]+', '+dateWithTime[1];
             status = await page.locator('.tb-step.current-step .tb-status').textContent();
             progressVal = 100;
         
@@ -112,19 +123,19 @@ export const getTrackingData = async (carrier) => {
               const month = await page.locator('.month_year span').first().textContent();
               const fullText = await page.locator('.month_year').textContent();
               const year = fullText.split(' ')[1];
-              ETAdate = month+', '+day+' '+year;
+              etaDate = month+', '+day+' '+year;
               progressVal = Math.floor((await page.locator('.tracking-progress-bar-status-container.in-transit-status div').count()/20)*100);  
 
           // otherwise set date, month, year to N/A
           } else {
-            ETAdate = 'N/A';
+            etaDate = 'N/A';
             progressVal = 0;
           } 
           // status should still exist
           status = await page.locator('.tb-step.current-step .tb-status-detail').textContent();
         }     
 
-        return createTrackingData(carrier, trackingInput, status, progressVal, ETAdate);
+        return createTrackingData(carrier, trackingInput, status, progressVal, etaDate);
     }
 
     // mapping for carriers to their respective functions
@@ -149,13 +160,13 @@ export const getTrackingData = async (carrier) => {
 };
 
 
-const createTrackingData = (carrier, trackingInput, status, progressVal, ETAdate) => {
+const createTrackingData = (carrier, trackingInput, status, progressVal, etaDate) => {
   return {
       carrier: carrier,
       trackingNumber: trackingInput,
       status: status,
       progress: progressVal,
-      ETA: ETAdate
+      ETA: etaDate
   };
 };
 
